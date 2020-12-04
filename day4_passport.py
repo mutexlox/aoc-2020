@@ -3,13 +3,17 @@ import re
 
 REQUIRED_FIELDS=['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
 
-def is_valid_passport(pass_lines):
-    p = " ".join(pass_lines)
-
+def has_all_fields(p):
     for f in REQUIRED_FIELDS:
         if not f in p:
             return False
-    # Validate each 
+    return True
+
+def is_valid_passport(p):
+    if not has_all_fields(p):
+        return False
+
+    # Validate each field
     fields = p.split()
     for f in fields:
         label, val = f.split(':')
@@ -58,17 +62,19 @@ def is_valid_passport(pass_lines):
 
 def count_valid_passports(lines):
     curr_pass = []
-    count = 0
+    lines.append("")
+    loose, strict = 0, 0
     for l in lines:
         if not l:
-            if is_valid_passport(curr_pass):
-                count += 1
+            p = " ".join(curr_pass)
+            if has_all_fields(p):
+                loose += 1
+            if is_valid_passport(p):
+                strict += 1
             curr_pass = []
         else:
             curr_pass.append(l)
-    if is_valid_passport(curr_pass):
-        count += 1
-    return count
+    return loose, strict
 
 def main(argv):
     with open(argv[1]) as f:
