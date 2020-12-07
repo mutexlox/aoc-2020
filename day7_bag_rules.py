@@ -29,8 +29,7 @@ def count_possible_outers(rev_graph, inner, seen=None):
     for colo in rev_graph[inner]:
         if colo not in seen:
             seen.add(colo)
-            count += 1
-            count += count_possible_outers(rev_graph, colo, seen)
+            count += 1 + count_possible_outers(rev_graph, colo, seen)
     return count
 
 def count_minimum_inner(graph, outer):
