@@ -13,6 +13,8 @@ def fix(prog):
         acc, worked = interpret(prog)
         if worked:
             return acc
+
+        # If not, restore original instruction
         prog[i] = op + ' ' + arg
     return None
 
