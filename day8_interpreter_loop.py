@@ -9,6 +9,8 @@ def fix(prog):
             prog[i] = 'nop ' + arg
         elif op == 'nop':
             prog[i] = 'jmp ' + arg
+        else:
+            continue  # No mutation to do.
         # ... and see if it worked
         acc, worked = interpret(prog)
         if worked:
@@ -42,6 +44,7 @@ def main(argv):
         lines = [x.rstrip() for x in f]
         print(interpret(lines)[0])
         print(fix(lines))
+
 
 if __name__ == "__main__":
     main(sys.argv)
