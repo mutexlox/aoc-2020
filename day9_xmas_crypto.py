@@ -22,10 +22,18 @@ def find_first_nonmatching(nums):
 
 def find_contiguous_set(nums, target):
     for i in xrange(len(nums)):
+        s = nums[i]
+        mini = nums[i]
+        maxi = nums[i]
         for j in xrange(i + 1, len(nums)):
-            s = sum(nums[i:j])
+            s += nums[j]
+            if nums[j] < mini:
+                mini = nums[j]
+            if nums[j] > maxi:
+                maxi = nums[j]
+
             if s == target:
-                return min(nums[i:j]) + max(nums[i:j])
+                return mini + maxi
             elif s > target:
                 break  # can't get there by adding more; all positive
 
