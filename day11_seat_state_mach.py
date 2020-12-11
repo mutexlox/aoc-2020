@@ -1,11 +1,19 @@
 import copy
 import sys
 
+SCRATCH = None
+ROWS = 0
+COLS = 0
+
+def copy_state(src, dest):
+    for i in range(len(src)):
+        for j in range(len(src[i])):
+            dest[i][j] = src[i][j]
+
 
 def step(state):
-    new_state = copy.deepcopy(state)
-    for row in range(len(state)):
-        for col in range(len(state[row])):
+    for row in range(ROWS):
+        for col in range(COLS):
             if state[row][col] == '.':
                 continue
             occ = 0
@@ -13,21 +21,19 @@ def step(state):
                 for j in range(-1, 2):
                     if i == 0 and j == 0:
                         continue
-                    if (row + i >= 0 and row + i < len(state) and
-                        col + j >= 0 and col + j < len(state[row])):
+                    if (row + i >= 0 and row + i < ROWS and
+                        col + j >= 0 and col + j < COLS):
                         if state[row + i][col + j] == '#':
                             occ += 1
             if occ == 0 and state[row][col] == 'L':
-                new_state[row][col] = '#'
+                SCRATCH[row][col] = '#'
             elif occ >= 4 and state[row][col] == '#':
-                new_state[row][col] = 'L'
-    return new_state
+                SCRATCH[row][col] = 'L'
 
 
 def step_pt2(state):
-    new_state = copy.deepcopy(state)
-    for row in range(len(state)):
-        for col in range(len(state[row])):
+    for row in range(ROWS):
+        for col in range(COLS):
             if state[row][col] == '.':
                 continue
             occ = 0
@@ -36,8 +42,8 @@ def step_pt2(state):
                     if i == 0 and j == 0:
                         continue
                     k = 1
-                    while (row + i * k >= 0 and row + i * k < len(state) and
-                        col + j * k >= 0 and col + j * k < len(state[row])):
+                    while (row + i * k >= 0 and row + i * k < ROWS and
+                        col + j * k >= 0 and col + j * k < COLS):
                         if state[row + i * k][col + j * k] == '#':
                             occ += 1
                             break
@@ -45,25 +51,30 @@ def step_pt2(state):
                             break
                         k += 1
             if occ == 0 and state[row][col] == 'L':
-                new_state[row][col] = '#'
+                SCRATCH[row][col] = '#'
             elif occ >= 5 and state[row][col] == '#':
-                new_state[row][col] = 'L'
-    return new_state
+                SCRATCH[row][col] = 'L'
 
 
 def iterate(init, f):
     state = init
-    new_state = f(state)
-    while state != new_state:
-        state = new_state
-        new_state = f(state)
+    copy_state(state, SCRATCH)
+    f(state)
+    while state != SCRATCH:
+        copy_state(SCRATCH, state)
+        f(state)
     return sum([r.count('#') for r in state])
 
 
 def main(argv):
+    global SCRATCH, ROWS, COLS
     with open(argv[1]) as f:
         lines = [[c for c in x.rstrip()] for x in f]
-        print(iterate(lines, step))
+        ROWS = len(lines)
+        COLS = len(lines[0])
+        SCRATCH = copy.deepcopy(lines)
+        state = copy.deepcopy(lines)
+        print(iterate(state, step))
         print(iterate(lines, step_pt2))
 
 
