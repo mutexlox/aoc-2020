@@ -64,7 +64,6 @@ def move_pt2(directions):
     return abs(ship_vert) + abs(ship_horiz)
 
 def main(argv):
-    global SCRATCH, ROWS, COLS
     with open(argv[1]) as f:
         lines = [x.rstrip() for x in f]
         print(move(lines))
