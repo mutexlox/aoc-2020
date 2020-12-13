@@ -12,48 +12,47 @@ def copy_state(src, dest):
             dest[i][j] = src[i][j]
 
 
+VISIBLE_SEATS = collections.defaultdict(list)
+def get_visible(state, row, col, keep_going):
+    if (row, col) not in VISIBLE_SEATS:
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if i == 0 and j == 0:
+                    continue
+                k = 1
+                while (row + i * k >= 0 and row + i * k < ROWS and
+                    col + j * k >= 0 and col + j * k < COLS):
+                    if state[row + i * k][col + j * k] != '.':
+                        VISIBLE_SEATS[(row,col)].append((row + i * k, col + j * k))
+                        break
+                    if not keep_going:
+                        break
+                    k += 1
+    return VISIBLE_SEATS[(row, col)]
+
+
 def step(state):
     for row in range(ROWS):
         for col in range(COLS):
             if state[row][col] == '.':
                 continue
             occ = 0
-            for i in range(-1, 2):
-                for j in range(-1, 2):
-                    if i == 0 and j == 0:
-                        continue
-                    if (row + i >= 0 and row + i < ROWS and
-                        col + j >= 0 and col + j < COLS):
-                        if state[row + i][col + j] == '#':
-                            occ += 1
+            for new_i, new_j in get_visible(state, row, col, False):
+                if state[new_i][new_j] == '#':
+                    occ += 1
             if occ == 0 and state[row][col] == 'L':
                 SCRATCH[row][col] = '#'
             elif occ >= 4 and state[row][col] == '#':
                 SCRATCH[row][col] = 'L'
 
-VISIBLE_SEATS = collections.defaultdict(list)
 
 def step_pt2(state):
-    global VISIBLE_SEATS
     for row in range(ROWS):
         for col in range(COLS):
             if state[row][col] == '.':
                 continue
             occ = 0
-            if (row, col) not in VISIBLE_SEATS:
-                for i in range(-1, 2):
-                    for j in range(-1, 2):
-                        if i == 0 and j == 0:
-                            continue
-                        k = 1
-                        while (row + i * k >= 0 and row + i * k < ROWS and
-                            col + j * k >= 0 and col + j * k < COLS):
-                            if state[row + i * k][col + j * k] != '.':
-                                VISIBLE_SEATS[(row,col)].append((row + i * k, col + j * k))
-                                break
-                            k += 1
-
-            for new_i, new_j in VISIBLE_SEATS[(row,col)]:
+            for new_i, new_j in get_visible(state, row, col, True):
                 if state[new_i][new_j] == '#':
                     occ += 1
             if occ == 0 and state[row][col] == 'L':
@@ -63,7 +62,9 @@ def step_pt2(state):
 
 
 def iterate(init, f):
+    global VISIBLE_SEATS
     state = init
+    VISIBLE_SEATS = collections.defaultdict(list)
     copy_state(state, SCRATCH)
     f(state)
     while state != SCRATCH:
