@@ -20,6 +20,7 @@ def get_nth(start, n):
 
 def main(argv):
     lines = [0,5,4,1,10,14,7]
+    print(get_nth(lines, 2020))
     print(get_nth(lines, 30000000))
 
 
