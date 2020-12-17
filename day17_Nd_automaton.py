@@ -1,5 +1,3 @@
-import copy
-import collections
 import itertools
 import sys
 
@@ -10,7 +8,7 @@ def get_neighbors(*args):
         yield tuple(args[i] + deltas[i] for i in range(len(args)))
 
 def step(state, bounds):
-    new_state = copy.deepcopy(state)
+    new_state = state.copy()
     iters = [range(b[0] - 1, b[1] + 2) for b in bounds]
     for coords in itertools.product(*iters):
         coords = tuple(coords)
