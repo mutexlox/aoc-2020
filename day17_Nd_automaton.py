@@ -7,30 +7,29 @@ def get_neighbors(*args):
             continue
         yield tuple(args[i] + deltas[i] for i in range(len(args)))
 
-def step(state, bounds):
+def step(state):
     new_state = state.copy()
-    iters = [range(b[0] - 1, b[1] + 2) for b in bounds]
-    for coords in itertools.product(*iters):
-        coords = tuple(coords)
+    neighbors = set()
+    for coords in state:
         count = 0
         for neighbor_coord in get_neighbors(*coords):
-            try:
-                if neighbor_coord in state:
-                    count += 1
-            except KeyError:
-                pass
-        if coords in state and count not in (2, 3):
+            neighbors.add(neighbor_coord)
+            if neighbor_coord in state:
+                count += 1
+        if count not in (2, 3):
             new_state.remove(coords)
-        elif coords not in state and count == 3:
-            new_state.add(coords)
-            # Update bounding box
-            for i in range(len(coords)):
-                if coords[i] < bounds[i][0]:
-                    bounds[i] = (coords[i], bounds[i][1])
-                elif coords[i] > bounds[i][1]:
-                    bounds[i] = (bounds[i][0], coords[i])
 
-    return new_state, bounds
+    for coords in neighbors:
+        count = 0
+        for neighbor_coord in get_neighbors(*coords):
+            if neighbor_coord in state:
+                count += 1
+                if count > 3:
+                    break
+        if count == 3:
+            new_state.add(coords)
+
+    return new_state
 
 def nsteps(init, steps, dim):
     state = set()
@@ -40,10 +39,8 @@ def nsteps(init, steps, dim):
             coord.extend(0 for _ in range(dim - 2))
             if init[x][y] == '#':
                 state.add(tuple(coord))
-    bounds = [(0, len(init)), (0, len(init[0]))]
-    bounds.extend((0, 1) for _ in range(dim - 2))
     for i in range(steps):
-        state, bounds = step(state, bounds)
+        state = step(state)
     return len(state)
 
 
