@@ -105,8 +105,7 @@ def main(argv):
             else:
                 nearby_ticks.append([int(x) for x in l.split(',')])
         parsed_rules = parse_rules(rules)
-                
-        lines = [x.rstrip() for x in f]
+
         print(count_valid_ticks(parsed_rules, nearby_ticks)),
         print(identify_fields(parsed_rules, your_tick, nearby_ticks))
 
