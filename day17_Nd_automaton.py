@@ -11,7 +11,6 @@ def get_neighbors(*args):
 
 def step(state, bounds):
     new_state = copy.deepcopy(state)
-    newbounds = copy.deepcopy(bounds)
     iters = [range(b[0] - 1, b[1] + 2) for b in bounds]
     for coords in itertools.product(*iters):
         coords = tuple(coords)
@@ -28,12 +27,12 @@ def step(state, bounds):
             new_state.add(coords)
             # Update bounding box
             for i in range(len(coords)):
-                if coords[i] < newbounds[i][0]:
-                    newbounds[i] = (coords[i], newbounds[i][1])
-                elif coords[i] > newbounds[i][1]:
-                    newbounds[i] = (newbounds[i][0], coords[i])
+                if coords[i] < bounds[i][0]:
+                    bounds[i] = (coords[i], bounds[i][1])
+                elif coords[i] > bounds[i][1]:
+                    bounds[i] = (bounds[i][0], coords[i])
 
-    return new_state, newbounds
+    return new_state, bounds
 
 def nsteps(init, steps, dim):
     state = set()
