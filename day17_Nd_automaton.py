@@ -1,3 +1,4 @@
+import collections
 import itertools
 import sys
 
@@ -9,24 +10,18 @@ def get_neighbors(*args):
 
 def step(state):
     new_state = state.copy()
-    neighbors = set()
+    neighbors = collections.defaultdict(int)
     for coords in state:
         count = 0
         for neighbor_coord in get_neighbors(*coords):
-            neighbors.add(neighbor_coord)
+            neighbors[neighbor_coord] += 1
             if neighbor_coord in state:
                 count += 1
         if count not in (2, 3):
             new_state.remove(coords)
 
     for coords in neighbors:
-        count = 0
-        for neighbor_coord in get_neighbors(*coords):
-            if neighbor_coord in state:
-                count += 1
-                if count > 3:
-                    break
-        if count == 3:
+        if neighbors[coords] == 3:
             new_state.add(coords)
 
     return new_state
