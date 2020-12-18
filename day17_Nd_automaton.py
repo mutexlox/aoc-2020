@@ -9,7 +9,7 @@ def get_neighbors(*args):
         yield tuple(args[i] + deltas[i] for i in range(len(args)))
 
 def step(state):
-    new_state = state.copy()
+    new_state = set()
     neighbors = collections.defaultdict(int)
     for coords in state:
         count = 0
@@ -18,8 +18,8 @@ def step(state):
                 count += 1
             else:
                 neighbors[neighbor_coord] += 1
-        if count not in (2, 3):
-            new_state.remove(coords)
+        if count in (2, 3):
+            new_state.add(coords)
 
     for coords in neighbors:
         if neighbors[coords] == 3:
