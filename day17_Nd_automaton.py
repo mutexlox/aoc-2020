@@ -14,9 +14,10 @@ def step(state):
     for coords in state:
         count = 0
         for neighbor_coord in get_neighbors(*coords):
-            neighbors[neighbor_coord] += 1
             if neighbor_coord in state:
                 count += 1
+            else:
+                neighbors[neighbor_coord] += 1
         if count not in (2, 3):
             new_state.remove(coords)
 
