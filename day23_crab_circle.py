@@ -66,8 +66,8 @@ def step(state):
             dest_label = state.maxi
 
     dest = state.find_node(dest_label)
-    for i in range(len(picked)):
-        state.insert_after(dest, picked[i])
+    for p in picked:
+        state.insert_after(dest, p)
         dest = dest.next
     state.advance_head()
 
