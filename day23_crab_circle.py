@@ -16,8 +16,11 @@ class List:
             self.insert_after(self.tail, item)
 
     def insert_after(self, node, item):
-        n = Node(item)
-        self.nodes[item] = n
+        try:
+            n = self.nodes[item]
+        except KeyError:
+            n = Node(item)
+            self.nodes[item] = n
         if self.head is None:
             self.head = n
             self.tail = n
@@ -30,7 +33,6 @@ class List:
 
     def remove_after(self, node):
         val = node.next.label
-        del self.nodes[val]
         if node.next == self.head:
             self.head = self.head.next
         if node.next == self.tail:
