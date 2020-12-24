@@ -31,7 +31,7 @@ def find_non_allergens(lines):
         if i not in possible_allergens:
             count += all_ingredients.count(i)
     return count, d
-    
+
 def find_canonical_list(d):
     canonical = {}
     while any(len(v) != 0 for v in d.values()):
