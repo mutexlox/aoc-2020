@@ -1,8 +1,8 @@
 import math
 import copy
 import collections
-import itertools
 import sys
+import re
 
 class Tile:
     def __init__(self, lines):
@@ -84,6 +84,30 @@ class Tile:
             clone.rotate((4-i) % 4)
 
 
+    def count_water_roughness(self):
+        num_hashes = 0
+        for l in self.lines:
+            for c in l:
+                if c == '#':
+                    num_hashes += 1
+
+        top_re =    re.compile('..................#.')
+        middle_re = re.compile('#....##....##....###')
+        bottom_re = re.compile('.#..#..#..#..#..#...')
+        sea_monster_hashes = 15
+
+        count = 0
+        for i in range(1, len(self.lines) - 1):
+            for match in middle_re.finditer(''.join(self.lines[i])):
+                s = match.start()
+                if (top_re.match(''.join(self.lines[i - 1]), s) and
+                    bottom_re.match(''.join(self.lines[i + 1]), s)):
+                    count += 1
+        if count == 0:
+            return None
+        return num_hashes - sea_monster_hashes * count
+
+
 def prod(l):
     o = 1
     for x in l:
@@ -111,6 +135,7 @@ def rotate_and_align_tiles(tiles):
 
     # Now find the corners
     corners = [m for m in matches if len(matches[m]) == 2]
+    print("part 1: %d" % prod(corners))
 
     line_size = int(math.sqrt(len(tiles)))
     compiled = [[[] for _i in range(line_size)] for _j in range(line_size)]
@@ -129,11 +154,6 @@ def rotate_and_align_tiles(tiles):
 
     compiled[0][0] = top_left_id
 
-    print("%s:" % top_left_id)
-    print(top_left.lines)
-    print(top_left.edge_order)
-    print("**")
-
     done = {}
     done[top_left_id] = (0,0)
     next_tiles = [top_left_match[0][0], top_left_match[1][0]]
@@ -141,7 +161,6 @@ def rotate_and_align_tiles(tiles):
     # OK, now we have one of them. get the rest.
     while next_tiles:
         next_id = next_tiles.pop(0)
-        print('next: %s' % next_id)
         neighbors = matches[next_id]
         tile = tiles[next_id]
         want = [None, None, None, None]
@@ -163,19 +182,12 @@ def rotate_and_align_tiles(tiles):
             if placed_match is None:
                 placed_match = n
 
-        print("placed_match: ", (placed_match))
         assert(tile.get_edges_to(want))
-
-        print("%s:" % next_id)
-        print(tile.lines)
-        print(tile.edge_order)
 
         # Find where it should go in relation to placed_match.
         _, matching_edge = tile.edge_order[placed_match[1]]
-        print(matching_edge)
 
         coords = done[placed_match[0]]
-        print(coords)
         if matching_edge == 0:
             # Below neighbor
             coords = (coords[0] + 1, coords[1])
@@ -189,13 +201,26 @@ def rotate_and_align_tiles(tiles):
             # To the right of neighbor
             coords = (coords[0], coords[1] + 1)
         compiled[coords[0]][coords[1]] = next_id
-        print(coords)
         done[next_id] = coords
-        print("**")
 
-    print(compiled)
-    return prod(corners)
+    # Now we've oriented and assembled all tiles. Combine them into an image.
+    line_size = (len(tiles[compiled[0][0]].lines) - 2) * line_size
+    image = [['.' for _i in range(line_size)] for _j in range(line_size)]
+    for tile_x in range(len(compiled)):
+        for tile_y in range(len(compiled[0])):
+            tile = tiles[compiled[tile_x][tile_y]]
+            multiplier = len(tile.lines) - 2
+            for internal_x in range(1, len(tile.lines) - 1):
+                for internal_y in range(1, len(tile.lines[0]) - 1):
+                    x = multiplier * tile_x + internal_x - 1
+                    y = multiplier * tile_y + internal_y - 1
+                    image[x][y] = tile.lines[internal_x][internal_y]
 
+    image = Tile(image)
+    for r in image.all_rotations():
+        c = r.count_water_roughness()
+        if c is not None:
+            print(c)
 
 def main(argv):
     with open(argv[1]) as f:
@@ -211,7 +236,7 @@ def main(argv):
                 i += 1
             tiles[tile_id] = Tile(tile_spec)
             i += 1
-        print(rotate_and_align_tiles(tiles))
+        rotate_and_align_tiles(tiles)
 
 if __name__ == "__main__":
     main(sys.argv)
