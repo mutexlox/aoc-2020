@@ -18,7 +18,7 @@ class Tile:
         # with whether it's reversed
         self.edge_order = [(False, 0), (False, 1), (False, 2), (False, 3)]
 
-    def vert_flip(self):
+    def flip(self):
         self.lines = list(reversed(self.lines))
         self.edges = [self.edges[2], list(reversed(self.edges[1])),
                       self.edges[0], list(reversed(self.edges[3]))]
@@ -77,12 +77,11 @@ class Tile:
         for i in range(0, 4):
             clone.rotate(i)
             yield clone
-            clone.vert_flip()
+            clone.flip()
             yield clone
             # Put it back
-            clone.vert_flip()
+            clone.flip()
             clone.rotate((4-i) % 4)
-
 
     def count_water_roughness(self):
         num_hashes = 0
@@ -91,7 +90,7 @@ class Tile:
                 if c == '#':
                     num_hashes += 1
 
-        top_re =    re.compile('..................#.')
+        top_re    = re.compile('..................#.')
         middle_re = re.compile('#....##....##....###')
         bottom_re = re.compile('.#..#..#..#..#..#...')
         sea_monster_hashes = 15
@@ -114,7 +113,7 @@ def prod(l):
         o *= x
     return o
 
-def rotate_and_align_tiles(tiles):
+def find_all_neighbors(tiles):
     matches = collections.defaultdict(list)
     # First, determine which edges can be next to each other...
     keys = list(tiles)
@@ -135,13 +134,18 @@ def rotate_and_align_tiles(tiles):
 
     # Now find the corners
     corners = [m for m in matches if len(matches[m]) == 2]
-    print("part 1: %d" % prod(corners))
+    return prod(corners), matches
 
+def rotate_and_align_tiles(tiles, matches):
     line_size = int(math.sqrt(len(tiles)))
     compiled = [[[] for _i in range(line_size)] for _j in range(line_size)]
 
-    # arbitrarily say corners[0] is top left at first.
-    top_left_id = corners[0]
+    # arbitrarily say first corner is top left at first.
+    top_left_id = None
+    for m in matches:
+        if len(matches[m]) == 2:
+            top_left_id = m
+            break
     top_left_match = matches[top_left_id]
     top_left = tiles[top_left_id]
 
@@ -220,7 +224,7 @@ def rotate_and_align_tiles(tiles):
     for r in image.all_rotations():
         c = r.count_water_roughness()
         if c is not None:
-            print(c)
+            return c
 
 def main(argv):
     with open(argv[1]) as f:
@@ -236,7 +240,9 @@ def main(argv):
                 i += 1
             tiles[tile_id] = Tile(tile_spec)
             i += 1
-        rotate_and_align_tiles(tiles)
+        corner_prod, matches = find_all_neighbors(tiles)
+        print(corner_prod)
+        print(rotate_and_align_tiles(tiles, matches))
 
 if __name__ == "__main__":
     main(sys.argv)
